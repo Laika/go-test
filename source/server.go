@@ -13,12 +13,14 @@ import (
 func EnrollFlag(id int, flag string) {
 	bid := []byte(strconv.Itoa(id))
 	bflag := []byte(flag)
-	db, _ := bitcask.Open("databases/flag")
+	db, err := bitcask.Open("databases/flag")
 	defer db.Close()
-	if !db.Has(bid) {
-		db.Put(bid, bflag)
-		fmt.Printf("[+] Enroll { %v : %v }\n", id, flag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[-] %v\n", err)
+		return
 	}
+	db.Put(bid, bflag)
+	fmt.Printf("[+] Enroll { %v : %v }\n", id, flag)
 }
 
 // GetFlag gets a flag
@@ -28,11 +30,11 @@ func GetFlag(id int) string {
 	defer db.Close()
 	flag := ""
 	bflag, err := db.Get(bid)
-	flag = string(bflag)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[-] %v\n", err)
 		return ""
 	}
+	flag = string(bflag)
 	return flag
 }
 
@@ -41,11 +43,13 @@ func DeleteFlag(id int) {
 	bid := []byte(strconv.Itoa(id))
 	db, _ := bitcask.Open("databases/flag")
 	defer db.Close()
-	if db.Has(bid) {
-		flag, _ := db.Get(bid)
-		db.Delete(bid)
-		fmt.Printf("[+] Delete { %v : %v }\n", id, string(flag))
+	flag, err := db.Get(bid)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[-] %v\n", err)
+		return
 	}
+	db.Delete(bid)
+	fmt.Printf("[+] Delete { %v : %v }\n", id, string(flag))
 }
 
 func main() {
