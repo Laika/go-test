@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -21,7 +22,7 @@ func RegisterFlag(id string, flag string) error {
 	if !db.Has(bid) {
 		db.Put(bid, bflag)
 	} else {
-		return fmt.Errorf("Another flag has been already registered")
+		return errors.New("Another flag has been already registered")
 	}
 	fmt.Printf("[+] Enroll { %v : %v }\n", id, flag)
 	return nil
@@ -73,33 +74,33 @@ func main() {
 
 	RegisterFlag("0", "FLAG")
 
-	r.PUT("/", func(c *gin.Context) {
+	r.POST("/register", func(c *gin.Context) {
 		c.Request.ParseForm()
 		problemid := c.Request.Form["id"]
 		flag := c.Request.Form["flag"]
 		err := RegisterFlag(problemid[0], flag[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[-] %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"error": err})
+			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		}
 
 	})
-	r.POST("/", func(c *gin.Context) {
+	r.POST("/check", func(c *gin.Context) {
 		c.Request.ParseForm()
 		problemid := c.Request.Form["id"]
 		submittedflag := c.Request.Form["flag"]
 		correct, err := CheckFlag(problemid[0], submittedflag[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[-] %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err, "correct": false})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "correct": false})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"error": err, "correct": correct})
+			c.JSON(http.StatusOK, gin.H{"error": err.Error(), "correct": correct})
 		}
 
 	})
-	r.DELETE("/", func(c *gin.Context) {
+	r.POST("/delete", func(c *gin.Context) {
 		c.Request.ParseForm()
 		problemid := c.Request.Form["id"]
 		for key, value := range c.Request.Form {
@@ -108,9 +109,9 @@ func main() {
 		err := DeleteFlag(problemid[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[-] %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"error": err})
+			c.JSON(http.StatusOK, gin.H{"error": err.Error()})
 		}
 	})
 	r.Run()
