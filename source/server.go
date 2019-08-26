@@ -9,7 +9,7 @@ import (
 	"github.com/prologic/bitcask"
 )
 
-// RegisterFlag enrolls the flag
+// RegisterFlag registers the flag
 func RegisterFlag(id string, flag string) error {
 	bid := []byte(id)
 	bflag := []byte(flag)
@@ -21,7 +21,6 @@ func RegisterFlag(id string, flag string) error {
 	if !db.Has(bid) {
 		db.Put(bid, bflag)
 	} else {
-		fmt.Fprintln(os.Stderr, "Another flag has been already registered")
 		return fmt.Errorf("Another flag has been already registered")
 	}
 	fmt.Printf("[+] Enroll { %v : %v }\n", id, flag)
