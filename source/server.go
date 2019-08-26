@@ -9,18 +9,19 @@ import (
 	"github.com/prologic/bitcask"
 )
 
-// EnrollFlag enrolls a flag
-func EnrollFlag(id int, flag string) {
+// RegisterFlag enrolls a flag
+func RegisterFlag(id int, flag string) error {
 	bid := []byte(strconv.Itoa(id))
 	bflag := []byte(flag)
 	db, err := bitcask.Open("databases/flag")
 	defer db.Close()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[-] %v\n", err)
-		return
+		return fmt.Errorf("Another flag has been already registered")
 	}
 	db.Put(bid, bflag)
 	fmt.Printf("[+] Enroll { %v : %v }\n", id, flag)
+	return nil
 }
 
 // GetFlag gets a flag
@@ -57,7 +58,7 @@ func main() {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	data := "Hello Go/Gin"
-	// EnrollFlag(0, "FLAG")
+	// RegisterFlag(0, "FLAG")
 	// flag := GetFlag(0)
 	// fmt.Println(flag)
 	// flag2 := GetFlag(5)
