@@ -9,8 +9,8 @@ import (
 	"github.com/prologic/bitcask"
 )
 
-// EnrollFlag enrolls the flag
-func EnrollFlag(id string, flag string) error {
+// RegisterFlag enrolls the flag
+func RegisterFlag(id string, flag string) error {
 	bid := []byte(id)
 	bflag := []byte(flag)
 	db, err := bitcask.Open("databases/flag")
@@ -21,8 +21,8 @@ func EnrollFlag(id string, flag string) error {
 	if !db.Has(bid) {
 		db.Put(bid, bflag)
 	} else {
-		fmt.Fprintln(os.Stderr, "Another flag has been already enrolled")
-		return fmt.Errorf("Another flag has been already enrolled")
+		fmt.Fprintln(os.Stderr, "Another flag has been already registered")
+		return fmt.Errorf("Another flag has been already registered")
 	}
 	fmt.Printf("[+] Enroll { %v : %v }\n", id, flag)
 	return nil
@@ -72,13 +72,13 @@ func main() {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*.html")
 
-	EnrollFlag("0", "FLAG")
+	RegisterFlag("0", "FLAG")
 
 	r.PUT("/", func(c *gin.Context) {
 		c.Request.ParseForm()
 		problemid := c.Request.Form["id"]
 		flag := c.Request.Form["flag"]
-		err := EnrollFlag(problemid[0], flag[0])
+		err := RegisterFlag(problemid[0], flag[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[-] %v\n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
