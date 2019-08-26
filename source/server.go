@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,16 +22,18 @@ func EnrollFlag(id int, flag string) {
 }
 
 // GetFlag gets a flag
-func GetFlag(id int) {
+func GetFlag(id int) string {
 	bid := []byte(strconv.Itoa(id))
 	db, _ := bitcask.Open("databases/flag")
 	defer db.Close()
-	if db.Has(bid) {
-		bflag, _ := db.Get(bid)
-	} else {
-		fmt.Errorf("[err] The flag ( ProblemID: %v ) is not enrolled.", id)
+	flag := ""
+	bflag, err := db.Get(bid)
+	flag = string(bflag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[-] %v\n", err)
+		return ""
 	}
-	return string(bflag)
+	return flag
 }
 
 // DeleteFlag deletes a flag
@@ -50,8 +53,12 @@ func main() {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*.html")
 	data := "Hello Go/Gin"
-	EnrollFlag(0, "FLAG")
-	DeleteFlag(0)
+	// EnrollFlag(0, "FLAG")
+	// flag := GetFlag(0)
+	// fmt.Println(flag)
+	// flag2 := GetFlag(5)
+	// fmt.Println(flag2)
+	// DeleteFlag(0)
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", gin.H{"data": data})
 	})
