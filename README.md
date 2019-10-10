@@ -1,2 +1,2 @@
-# ctf-judge-server
+# go-test
 A judging server for CTF
