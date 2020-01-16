@@ -1,2 +1,2 @@
 # go-test
-A judging server for CTF
+A server
